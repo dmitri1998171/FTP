@@ -1,30 +1,6 @@
-#include "commands.h"
+#include "extentions.h"
 
 #define COMMAND_COUNTER 38
-
-void dieWithError(char *str) {
-    printf("%s\n", str);
-    exit(1);
-}
-
-int checkIP(char *str) {
-    int octetCounter = 0;
-    char *token, *last;
-    char *ip = strtok(str, ":");
-
-    token = strtok_r(str, ".", &last);
-    while(token != NULL) {
-        if(atoi(token) > 255)
-            dieWithError("Invalid IP!");
-        token = strtok_r(NULL, ".", &last);
-        octetCounter++;
-    }
-    
-    if(octetCounter == 4) 
-        return 1;
-    else
-        return 0;
-}
 
 int main(int argc, char *argv[]) {
     int run = 1;
@@ -49,7 +25,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        if(command_checker) {   
+        if(command_checker) {
             if(!strcmp(command, "!"))
                 consoleCommand();
             if(!strcmp(command, "?"))
@@ -73,8 +49,17 @@ int main(int argc, char *argv[]) {
             // if(!strcmp(command, "mkdir"))
             // if(!strcmp(command, "mls"))
             // if(!strcmp(command, "mput"))
-            if(!strcmp(command, "open"))
-                openCommand("1");
+            if(!strcmp(command, "open")) {
+                char ip[20];
+                
+                printf("(to) ");
+                scanf("%s", ip);
+
+                if(checkIP(ip))
+                    openCommand(ip);
+                else
+                    printf("ftp: %s: Temporary failure in name resolution\n", ip);
+            }
             // if(!strcmp(command, "passive"))
             // if(!strcmp(command, "put"))
             // if(!strcmp(command, "rename"))

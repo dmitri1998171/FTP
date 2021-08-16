@@ -2,7 +2,7 @@ CLIENT := client
 SERVER := server
 SOURCE_CLIENT := client.c
 SOURCE_SERVER := server.c
-SOURCE_EXT := commands.c
+SOURCE_EXT := commands.c extentions.c
 CC := gcc
 CFLAGS := 
 
