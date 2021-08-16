@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+#include "commands.h"
 
 #define COMMAND_COUNTER 38
 
@@ -29,18 +26,6 @@ int checkIP(char *str) {
         return 0;
 }
 
-void openCommand(char *ip) {
-    printf("\topenCommand\n");
-}
-
-void consoleCommand() {
-    printf("\tconsoleCommand\n");
-}
-
-void helpListCommand() {
-    
-}
-
 int main(int argc, char *argv[]) {
     int run = 1;
     int command_checker = 0;
@@ -65,9 +50,44 @@ int main(int argc, char *argv[]) {
         }
 
         if(command_checker) {   
+            if(!strcmp(command, "!"))
+                consoleCommand();
+            if(!strcmp(command, "?"))
+                helpListCommand();
+            // if(!strcmp(command, "ascii"))
+            // if(!strcmp(command, "binary"))
+            // if(!strcmp(command, "cd"))
+            // if(!strcmp(command, "cdup"))
+            // if(!strcmp(command, "close"))
+            // if(!strcmp(command, "delete"))
+            // if(!strcmp(command, "disconnect"))
+            // if(!strcmp(command, "dir"))
+            // if(!strcmp(command, "get"))
+            // if(!strcmp(command, "hash"))
+            // if(!strcmp(command, "help"))
+            // if(!strcmp(command, "lcd"))
+            // if(!strcmp(command, "ls"))
+            // if(!strcmp(command, "mdelete"))
+            // if(!strcmp(command, "mdir"))
+            // if(!strcmp(command, "mget"))
+            // if(!strcmp(command, "mkdir"))
+            // if(!strcmp(command, "mls"))
+            // if(!strcmp(command, "mput"))
             if(!strcmp(command, "open"))
                 openCommand("1");
-            if(!strcmp(command, "bye") || !strcmp(command, "exit"))
+            // if(!strcmp(command, "passive"))
+            // if(!strcmp(command, "put"))
+            // if(!strcmp(command, "rename"))
+            // if(!strcmp(command, "restart"))
+            // if(!strcmp(command, "reset"))
+            // if(!strcmp(command, "recv"))
+            // if(!strcmp(command, "rstatus"))
+            // if(!strcmp(command, "rmdir"))
+            // if(!strcmp(command, "send"))
+            // if(!strcmp(command, "sendport"))
+            // if(!strcmp(command, "size"))
+            // if(!strcmp(command, "status"))
+            if(!strcmp(command, "bye") || !strcmp(command, "exit") || !strcmp(command, "quit"))
                 run = 0;
             
             command_checker = 0;
