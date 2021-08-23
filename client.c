@@ -1,12 +1,10 @@
 #include "extentions.h"
 
-#define COMMAND_COUNTER 38
 
 int main(int argc, char *argv[]) {
     int run = 1;
-    int command_checker = 0;
     char command[15];
-    char commands[COMMAND_COUNTER][12] = {"!", "?", "ascii", "binary", "bye", "cd", "cdup", "close", "delete", "disconnect", "dir", "exit", "get", "hash", "help", "lcd", "ls", "mdelete", "mdir", "mget", "mkdir", "mls", "mput", "open", "passive", "put", "pwd", "rename", "restart", "reset", "recv", "rstatus", "rmdir", "send", "sendport", "size", "status", "quit"};
+    char commands[COMMAND_COUNTER][12] = {"!", "?", "ascii", "binary", "bye", "cd", "cdup", "close", "delete", "dir", "exit", "get", "hash", "help", "lcd", "ls", "mdelete", "mdir", "mget", "mkdir", "mls", "mput", "open", "passive", "put", "pwd", "rename", "restart", "reset", "recv", "rstatus", "rmdir", "send", "size", "status", "sendport", "quit", "disconnect"};
     
     if(argc > 1) {
         if(checkIP(argv[1]))
@@ -18,18 +16,11 @@ int main(int argc, char *argv[]) {
         printf("ftp> ");
         scanf("%s", command);
 
-        for (int i = 0; i < COMMAND_COUNTER; i++) {
-            if(!strcmp(commands[i], command)) {
-                command_checker = 1;
-                break;
-            }
-        }
-
-        if(command_checker) {
+        if(checkTheCommand(commands, command)) {
             if(!strcmp(command, "!"))
                 consoleCommand();
-            if(!strcmp(command, "?"))
-                helpListCommand();
+            if(!strcmp(command, "?") || !strcmp(command, "help"))
+                helpListCommand(commands);
             // if(!strcmp(command, "ascii"))
             // if(!strcmp(command, "binary"))
             // if(!strcmp(command, "cd"))
@@ -40,7 +31,6 @@ int main(int argc, char *argv[]) {
             // if(!strcmp(command, "dir"))
             // if(!strcmp(command, "get"))
             // if(!strcmp(command, "hash"))
-            // if(!strcmp(command, "help"))
             // if(!strcmp(command, "lcd"))
             // if(!strcmp(command, "ls"))
             // if(!strcmp(command, "mdelete"))
@@ -73,10 +63,9 @@ int main(int argc, char *argv[]) {
             // if(!strcmp(command, "size"))
             // if(!strcmp(command, "status"))
             if(!strcmp(command, "bye") || !strcmp(command, "exit") || !strcmp(command, "quit"))
-                run = 0;
-            
-            command_checker = 0;
-        } else
+                run = 0;            
+        } 
+        else
             printf("Invalid command\n");
     }
 

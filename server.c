@@ -1,8 +1,6 @@
 #include "extentions.h" 
 
 #define MAXPENDING 5    
-#define RCVBUFSIZE 32   
-
 
 int main(int argc, char *argv[]) {
     char echoBuffer[RCVBUFSIZE];     
@@ -47,14 +45,16 @@ int main(int argc, char *argv[]) {
         if ((recvMsgSize = recv(clntSock, echoBuffer, RCVBUFSIZE, 0)) < 0)
             dieWithError("recv() failed");
 
-        while (recvMsgSize > 0)      
-        {
+        printf("%s\n", echoBuffer);
+
+        // while (recvMsgSize > 0)
+        // {
             if (send(clntSock, echoBuffer, recvMsgSize, 0) != recvMsgSize)
                 dieWithError("send() failed");
 
-            if ((recvMsgSize = recv(clntSock, echoBuffer, RCVBUFSIZE, 0)) < 0)
-                dieWithError("recv() failed");
-        }
+            // if ((recvMsgSize = recv(clntSock, echoBuffer, RCVBUFSIZE, 0)) < 0)
+            //     dieWithError("recv() failed");
+        // }
 
         close(clntSock);
     }
