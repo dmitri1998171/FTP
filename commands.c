@@ -1,4 +1,5 @@
 #include "extentions.h"
+#include "commands.h"
 
 int checkTheCommand(char (*commands)[12], char *command) {
     int command_checker = 0;
@@ -13,30 +14,45 @@ int checkTheCommand(char (*commands)[12], char *command) {
     return command_checker;
 }
 
+void handshakeFunc(int *sock, char *echoString, char* echoBuffer) {
+    sendFunc(sock, "SYN");
+    receiveFunc(sock, echoBuffer);
+
+    if(!strcmp(echoBuffer, "SYN+ACK"))
+        sendFunc(sock, "ACK");
+
+    receiveFunc(sock, echoBuffer);
+    
+    if(!strcmp(echoBuffer, "225"))
+        printf("Handshake complete!\n\n");
+}
+
 void openCommand(char *ip) {
     unsigned short echoServPort = 1026;
-    unsigned int echoStringLen;
     int sock;
-    char *echoString = {"Hello there!"};
-    char echoBuffer[RCVBUFSIZE];    
+    char *echoString = { "Hello there!" };
+    char echoBuffer[RCVBUFSIZE];
     struct sockaddr_in echoServAddr; 
 
     if((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         dieWithError("socket() failed");
 
     memset(&echoServAddr, 0, sizeof(echoServAddr));
-    echoServAddr.sin_family      = AF_INET;
+    echoServAddr.sin_family = AF_INET;
     echoServAddr.sin_addr.s_addr = inet_addr(ip);
-    echoServAddr.sin_port        = htons(echoServPort); 
+    echoServAddr.sin_port = htons(echoServPort);
 
     if(connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         dieWithError("connect() failed");
 
-    echoStringLen = sendFunc(&sock, echoString);
+    // handshakeFunc(&sock, echoString, echoBuffer);
 
-    receiveFunc(&sock, echoBuffer, echoStringLen);
+    receiveFunc(&sock, echoBuffer);
+    
+    if(!strcmp(echoBuffer, "225"))
+        printf("Connection complete!\n\n");
 
-    close(sock);
+    // close(sock);
 }
 
 void consoleCommand() {

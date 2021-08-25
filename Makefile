@@ -1,8 +1,8 @@
 CLIENT := client
 SERVER := server
-SOURCE_CLIENT := client.c
+SOURCE_CLIENT := client.c commands.c
 SOURCE_SERVER := server.c
-SOURCE_EXT := commands.c extentions.c
+SOURCE_EXT := extentions.c
 CC := gcc
 CFLAGS := 
 

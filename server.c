@@ -1,16 +1,32 @@
 #include "extentions.h" 
 
-#define MAXPENDING 5    
+#define MAXPENDING 5 
+
+void handshakeServFunc(int *clntSock, char *echoBuffer) {
+    receiveFunc(clntSock, echoBuffer);
+
+    if(!strcmp(echoBuffer, "SYN")) 
+        strcat(echoBuffer, "+ACK");
+
+    sendFunc(clntSock, echoBuffer);
+    receiveFunc(clntSock, echoBuffer);
+
+    if(!strcmp(echoBuffer, "ACK")) 
+        strcpy(echoBuffer, "225");
+
+    sendFunc(clntSock, echoBuffer);
+    printf("Handshake complete!\n\n");
+}
 
 int main(int argc, char *argv[]) {
-    char echoBuffer[RCVBUFSIZE];     
-    int recvMsgSize;                 
-    int servSock;                    
-    int clntSock;                    
+    char echoBuffer[RCVBUFSIZE];
+    char tmp[RCVBUFSIZE];
+    int recvMsgSize;
+    int servSock, clntSock;
     struct sockaddr_in echoServAddr; 
     struct sockaddr_in echoClntAddr; 
-    unsigned short echoServPort;     
-    unsigned int clntLen;            
+    unsigned short echoServPort;
+    unsigned int clntLen;
 
     if (argc != 2) {
         fprintf(stderr, "Usage:  %s <Server Port>\n", argv[0]);
@@ -36,28 +52,16 @@ int main(int argc, char *argv[]) {
     while(1) {
         clntLen = sizeof(echoClntAddr);
 
-        if ((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, 
-                               &clntLen)) < 0)
+        if ((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, &clntLen)) < 0)
             dieWithError("accept() failed");
 
         printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
 
-        if ((recvMsgSize = recv(clntSock, echoBuffer, RCVBUFSIZE, 0)) < 0)
-            dieWithError("recv() failed");
+        // handshakeServFunc(&clntSock, echoBuffer);
 
-        printf("%s\n", echoBuffer);
-
-        // while (recvMsgSize > 0)
-        // {
-            if (send(clntSock, echoBuffer, recvMsgSize, 0) != recvMsgSize)
-                dieWithError("send() failed");
-
-            // if ((recvMsgSize = recv(clntSock, echoBuffer, RCVBUFSIZE, 0)) < 0)
-            //     dieWithError("recv() failed");
-        // }
-
-        close(clntSock);
+        sendFunc(&clntSock, "225");
     }
-
+    
+    close(clntSock);
     return 0;
 }

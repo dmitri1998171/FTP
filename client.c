@@ -1,5 +1,5 @@
 #include "extentions.h"
-
+#include "commands.h"
 
 int main(int argc, char *argv[]) {
     int run = 1;
@@ -10,6 +10,11 @@ int main(int argc, char *argv[]) {
         if(checkIP(argv[1]))
             openCommand(argv[1]);
     }
+    if (argc > 2) {
+        fprintf(stderr, "Usage:  %s [Server IP]\n", argv[0]);
+        exit(1);
+    }
+
     printf("\n");
     
     while(run) {
