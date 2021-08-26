@@ -3,12 +3,14 @@
 
 int main(int argc, char *argv[]) {
     int run = 1;
+    int sock;
+    char echoBuffer[RCVBUFSIZE];
     char command[15];
     char commands[COMMAND_COUNTER][12] = {"!", "?", "ascii", "binary", "bye", "cd", "cdup", "close", "delete", "dir", "exit", "get", "hash", "help", "lcd", "ls", "mdelete", "mdir", "mget", "mkdir", "mls", "mput", "open", "passive", "put", "pwd", "rename", "restart", "reset", "recv", "rstatus", "rmdir", "send", "size", "status", "sendport", "quit", "disconnect"};
     
     if(argc > 1) {
         if(checkIP(argv[1]))
-            openCommand(argv[1]);
+            openCommand(&sock, argv[1], echoBuffer);
     }
     if (argc > 2) {
         fprintf(stderr, "Usage:  %s [Server IP]\n", argv[0]);
@@ -32,7 +34,8 @@ int main(int argc, char *argv[]) {
             // if(!strcmp(command, "cdup"))
             // if(!strcmp(command, "close"))
             // if(!strcmp(command, "delete"))
-            // if(!strcmp(command, "disconnect"))
+            if(!strcmp(command, "disconnect"))
+                disconnectFunc(&sock, echoBuffer);
             // if(!strcmp(command, "dir"))
             // if(!strcmp(command, "get"))
             // if(!strcmp(command, "hash"))
@@ -51,7 +54,7 @@ int main(int argc, char *argv[]) {
                 scanf("%s", ip);
 
                 if(checkIP(ip))
-                    openCommand(ip);
+                    openCommand(&sock, ip, echoBuffer);
                 else
                     printf("ftp: %s: Temporary failure in name resolution\n", ip);
             }

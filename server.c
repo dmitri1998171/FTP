@@ -2,22 +2,6 @@
 
 #define MAXPENDING 5 
 
-void handshakeServFunc(int *clntSock, char *echoBuffer) {
-    receiveFunc(clntSock, echoBuffer);
-
-    if(!strcmp(echoBuffer, "SYN")) 
-        strcat(echoBuffer, "+ACK");
-
-    sendFunc(clntSock, echoBuffer);
-    receiveFunc(clntSock, echoBuffer);
-
-    if(!strcmp(echoBuffer, "ACK")) 
-        strcpy(echoBuffer, "225");
-
-    sendFunc(clntSock, echoBuffer);
-    printf("Handshake complete!\n\n");
-}
-
 int main(int argc, char *argv[]) {
     char echoBuffer[RCVBUFSIZE];
     char tmp[RCVBUFSIZE];
@@ -52,14 +36,22 @@ int main(int argc, char *argv[]) {
     while(1) {
         clntLen = sizeof(echoClntAddr);
 
-        if ((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, &clntLen)) < 0)
+        if((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, &clntLen)) < 0)
             dieWithError("accept() failed");
+        else {
+            printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
+            sendFunc(&clntSock, "225");
+        }
 
-        printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
+        while(1) {
+            receiveFunc(&clntSock, echoBuffer);
 
-        // handshakeServFunc(&clntSock, echoBuffer);
-
-        sendFunc(&clntSock, "225");
+            if(!strcmp(echoBuffer, "QUIT")) {
+                sendFunc(&clntSock, "221");
+                close(clntSock);
+                break;
+            }
+        }
     }
     
     close(clntSock);

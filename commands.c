@@ -27,14 +27,12 @@ void handshakeFunc(int *sock, char *echoString, char* echoBuffer) {
         printf("Handshake complete!\n\n");
 }
 
-void openCommand(char *ip) {
+void openCommand(int *sock, char *ip, char *echoBuffer) {
     unsigned short echoServPort = 1026;
-    int sock;
     char *echoString = { "Hello there!" };
-    char echoBuffer[RCVBUFSIZE];
     struct sockaddr_in echoServAddr; 
 
-    if((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+    if((*sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         dieWithError("socket() failed");
 
     memset(&echoServAddr, 0, sizeof(echoServAddr));
@@ -42,17 +40,28 @@ void openCommand(char *ip) {
     echoServAddr.sin_addr.s_addr = inet_addr(ip);
     echoServAddr.sin_port = htons(echoServPort);
 
-    if(connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
+    if(connect(*sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         dieWithError("connect() failed");
 
     // handshakeFunc(&sock, echoString, echoBuffer);
 
-    receiveFunc(&sock, echoBuffer);
+    receiveFunc(sock, echoBuffer);
     
     if(!strcmp(echoBuffer, "225"))
         printf("Connection complete!\n\n");
 
     // close(sock);
+}
+
+void disconnectFunc(int *sock, char *echoBuffer) {
+    sendFunc(sock, "QUIT");
+
+    receiveFunc(sock, echoBuffer);
+    
+    if(!strcmp(echoBuffer, "221"))
+        printf("Disconnect complete!\n\n");
+
+    close(*sock);
 }
 
 void consoleCommand() {
