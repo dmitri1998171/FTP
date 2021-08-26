@@ -27,6 +27,40 @@ void handshakeFunc(int *sock, char *echoString, char* echoBuffer) {
         printf("Handshake complete!\n\n");
 }
 
+void authLogin(int *sock, char* echoBuffer) {
+    char username[RCVBUFSIZE];
+
+    printf("Name: ");
+    scanf("%s", username);
+
+    sendFunc(sock, username);
+    receiveFunc(sock, echoBuffer);
+
+    if(!strcmp(echoBuffer, "331")) {
+        printf("331 Please specify the password\n");
+        authPasswrd(sock, echoBuffer);
+    }
+    else
+        printf("530 Login incorrect\nLogin failed\n\n");
+}
+
+void authPasswrd(int *sock, char* echoBuffer) {
+    char passwrd[RCVBUFSIZE];
+
+    printf("Password: ");
+    scanf("%s", passwrd);
+
+    sendFunc(sock, passwrd);
+    receiveFunc(sock, echoBuffer);
+
+    if(!strcmp(echoBuffer, "230")) 
+        printf("230 Login successful\n");
+    else {
+        printf("530 Password incorrect\n");
+        close(*sock);
+    }
+}
+
 void openCommand(int *sock, char *ip, char *echoBuffer) {
     unsigned short echoServPort = 1026;
     char *echoString = { "Hello there!" };
@@ -47,10 +81,12 @@ void openCommand(int *sock, char *ip, char *echoBuffer) {
 
     receiveFunc(sock, echoBuffer);
     
-    if(!strcmp(echoBuffer, "225"))
-        printf("Connection complete!\n\n");
+    if(!strcmp(echoBuffer, "220")) {
+        printf("Connected to %s\n\n", ip);
+        authLogin(sock, echoBuffer);
+    }
 
-    // close(sock);
+    // close(*sock);
 }
 
 void disconnectFunc(int *sock, char *echoBuffer) {

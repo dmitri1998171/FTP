@@ -32,9 +32,8 @@ int main(int argc, char *argv[]) {
             // if(!strcmp(command, "binary"))
             // if(!strcmp(command, "cd"))
             // if(!strcmp(command, "cdup"))
-            // if(!strcmp(command, "close"))
             // if(!strcmp(command, "delete"))
-            if(!strcmp(command, "disconnect"))
+            if(!strcmp(command, "disconnect") || !strcmp(command, "close"))
                 disconnectFunc(&sock, echoBuffer);
             // if(!strcmp(command, "dir"))
             // if(!strcmp(command, "get"))
