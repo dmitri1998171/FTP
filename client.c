@@ -2,15 +2,17 @@
 #include "commands.h"
 
 int main(int argc, char *argv[]) {
-    int run = 1;
+    int run = 1, authChecker = 0;
     int sock;
     char echoBuffer[RCVBUFSIZE];
     char command[15];
     char commands[COMMAND_COUNTER][12] = {"!", "?", "ascii", "binary", "bye", "cd", "cdup", "close", "delete", "dir", "exit", "get", "hash", "help", "lcd", "ls", "mdelete", "mdir", "mget", "mkdir", "mls", "mput", "open", "passive", "put", "pwd", "rename", "restart", "reset", "recv", "rstatus", "rmdir", "send", "size", "status", "sendport", "quit", "disconnect"};
     
     if(argc > 1) {
-        if(checkIP(argv[1]))
-            openCommand(&sock, argv[1], echoBuffer);
+        if(checkIP(argv[1])) {
+            openCommand(&sock, argv[1], 1026);
+            checkConnection(&sock, argv[1], echoBuffer);
+        }
     }
     if (argc > 2) {
         fprintf(stderr, "Usage:  %s [Server IP]\n", argv[0]);
@@ -28,49 +30,60 @@ int main(int argc, char *argv[]) {
                 consoleCommand();
             if(!strcmp(command, "?") || !strcmp(command, "help"))
                 helpListCommand(commands);
-            // if(!strcmp(command, "ascii"))
-            // if(!strcmp(command, "binary"))
-            // if(!strcmp(command, "cd"))
-            // if(!strcmp(command, "cdup"))
-            // if(!strcmp(command, "delete"))
-            if(!strcmp(command, "disconnect") || !strcmp(command, "close"))
-                disconnectFunc(&sock, echoBuffer);
-            // if(!strcmp(command, "dir"))
-            // if(!strcmp(command, "get"))
-            // if(!strcmp(command, "hash"))
-            // if(!strcmp(command, "lcd"))
-            // if(!strcmp(command, "ls"))
-            // if(!strcmp(command, "mdelete"))
-            // if(!strcmp(command, "mdir"))
-            // if(!strcmp(command, "mget"))
-            // if(!strcmp(command, "mkdir"))
-            // if(!strcmp(command, "mls"))
-            // if(!strcmp(command, "mput"))
+            if(!strcmp(command, "bye") || !strcmp(command, "exit") || !strcmp(command, "quit"))
+                run = 0;
             if(!strcmp(command, "open")) {
                 char ip[20];
                 
                 printf("(to) ");
                 scanf("%s", ip);
 
-                if(checkIP(ip))
-                    openCommand(&sock, ip, echoBuffer);
+                if(checkIP(ip)) {
+                    openCommand(&sock, ip, 1026);
+                    checkConnection(&sock, ip, echoBuffer);
+                }
                 else
                     printf("ftp: %s: Temporary failure in name resolution\n", ip);
             }
-            // if(!strcmp(command, "passive"))
-            // if(!strcmp(command, "put"))
-            // if(!strcmp(command, "rename"))
-            // if(!strcmp(command, "restart"))
-            // if(!strcmp(command, "reset"))
-            // if(!strcmp(command, "recv"))
-            // if(!strcmp(command, "rstatus"))
-            // if(!strcmp(command, "rmdir"))
-            // if(!strcmp(command, "send"))
-            // if(!strcmp(command, "sendport"))
-            // if(!strcmp(command, "size"))
-            // if(!strcmp(command, "status"))
-            if(!strcmp(command, "bye") || !strcmp(command, "exit") || !strcmp(command, "quit"))
-                run = 0;            
+
+            // if(!strcmp(command, "ascii"))
+            // if(!strcmp(command, "binary"))
+        
+            if(authChecker) {
+                // if(!strcmp(command, "cd"))
+                // if(!strcmp(command, "cdup"))
+                // if(!strcmp(command, "delete"))
+                if(!strcmp(command, "disconnect") || !strcmp(command, "close")) {
+                    disconnectFunc(&sock, echoBuffer);
+                    authChecker = 0;
+                }
+                // if(!strcmp(command, "dir"))
+                // if(!strcmp(command, "get"))
+                // if(!strcmp(command, "hash"))
+                // if(!strcmp(command, "lcd"))
+                if(!strcmp(command, "ls"))
+                    lsCommand(&sock, echoBuffer);
+                // if(!strcmp(command, "mdelete"))
+                // if(!strcmp(command, "mdir"))
+                // if(!strcmp(command, "mget"))
+                // if(!strcmp(command, "mkdir"))
+                // if(!strcmp(command, "mls"))
+                // if(!strcmp(command, "mput"))
+                // if(!strcmp(command, "passive"))
+                // if(!strcmp(command, "put"))
+                // if(!strcmp(command, "rename"))
+                // if(!strcmp(command, "restart"))
+                // if(!strcmp(command, "reset"))
+                // if(!strcmp(command, "recv"))
+                // if(!strcmp(command, "rstatus"))
+                // if(!strcmp(command, "rmdir"))
+                // if(!strcmp(command, "send"))
+                // if(!strcmp(command, "sendport"))
+                // if(!strcmp(command, "size"))
+                // if(!strcmp(command, "status"))
+            }
+            else
+                printf("Not connected\n");        
         } 
         else
             printf("Invalid command\n");

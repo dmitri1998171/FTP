@@ -14,19 +14,6 @@ int checkTheCommand(char (*commands)[12], char *command) {
     return command_checker;
 }
 
-void handshakeFunc(int *sock, char *echoString, char* echoBuffer) {
-    sendFunc(sock, "SYN");
-    receiveFunc(sock, echoBuffer);
-
-    if(!strcmp(echoBuffer, "SYN+ACK"))
-        sendFunc(sock, "ACK");
-
-    receiveFunc(sock, echoBuffer);
-    
-    if(!strcmp(echoBuffer, "225"))
-        printf("Handshake complete!\n\n");
-}
-
 void authLogin(int *sock, char* echoBuffer) {
     char username[RCVBUFSIZE];
 
@@ -61,9 +48,16 @@ void authPasswrd(int *sock, char* echoBuffer) {
     }
 }
 
-void openCommand(int *sock, char *ip, char *echoBuffer) {
-    unsigned short echoServPort = 1026;
-    char *echoString = { "Hello there!" };
+void checkConnection(int *sock, char *ip, char *echoBuffer) {
+    receiveFunc(sock, echoBuffer);
+    
+    if(!strcmp(echoBuffer, "220")) {
+        printf("Connected to %s\n\n", ip);
+        authLogin(sock, echoBuffer);
+    }
+}
+
+void openCommand(int *sock, char *ip, unsigned short echoServPort) {
     struct sockaddr_in echoServAddr; 
 
     if((*sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -76,17 +70,6 @@ void openCommand(int *sock, char *ip, char *echoBuffer) {
 
     if(connect(*sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         dieWithError("connect() failed");
-
-    // handshakeFunc(&sock, echoString, echoBuffer);
-
-    receiveFunc(sock, echoBuffer);
-    
-    if(!strcmp(echoBuffer, "220")) {
-        printf("Connected to %s\n\n", ip);
-        authLogin(sock, echoBuffer);
-    }
-
-    // close(*sock);
 }
 
 void disconnectFunc(int *sock, char *echoBuffer) {
@@ -115,4 +98,10 @@ void helpListCommand(char (*commands)[12]) {
     }
 
     printf("\n\n");
+}
+
+void lsCommand(int *sock, char *echoBuffer) {
+    strcpy(echoBuffer, "LIST");
+    sendFunc(sock, echoBuffer);
+    receiveFunc(sock, echoBuffer);
 }
