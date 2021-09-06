@@ -34,16 +34,30 @@ int authLogin(int *sock, char* echoBuffer, struct auth_struct *logPassList) {
     sendFunc(sock, "530");
 }
 
+void createConnection(int *servSock, unsigned short echoServPort) {
+    struct sockaddr_in echoServAddr; 
+    
+    if ((*servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+        dieWithError("socket() failed");
+      
+    memset(&echoServAddr, 0, sizeof(echoServAddr));
+    echoServAddr.sin_family = AF_INET;
+    echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); 
+    echoServAddr.sin_port = htons(echoServPort); 
+
+    if (bind(*servSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
+        dieWithError("bind() failed");
+}
+
 int main(int argc, char *argv[]) {
     char echoBuffer[RCVBUFSIZE];
     char tmp[RCVBUFSIZE];
     int authChecker = 0;
     int recvMsgSize;
-    int servSock, clntSock;
-    struct sockaddr_in echoServAddr; 
-    struct sockaddr_in echoClntAddr; 
+    int servSock, clntSock, servSockData, clntSockData;
+    struct sockaddr_in echoClntAddr, echoClntAddrData; 
     unsigned short echoServPort;
-    unsigned int clntLen;
+    unsigned int clntLen, clntLenData;
 
     struct auth_struct logPassList[3] = {"admin",     "admin", 
                                          "anonymous", "",
@@ -56,23 +70,18 @@ int main(int argc, char *argv[]) {
 
     echoServPort = atoi(argv[1]);  
 
-    if ((servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-        dieWithError("socket() failed");
-      
-    memset(&echoServAddr, 0, sizeof(echoServAddr));
-    echoServAddr.sin_family = AF_INET;   
-    echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); 
-    echoServAddr.sin_port = htons(echoServPort); 
-
-    if (bind(servSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
-        dieWithError("bind() failed");
+    createConnection(&servSock, echoServPort);
 
     if (listen(servSock, MAXPENDING) < 0)
         dieWithError("listen() failed");
 
+    createConnection(&servSockData, echoServPort + 21);
+
+    if (listen(servSockData, MAXPENDING) < 0)
+        dieWithError("listen() failed");
+
     while(1) {
         clntLen = sizeof(echoClntAddr);
-
         if((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, &clntLen)) < 0)
             dieWithError("accept() failed");
         else {
@@ -87,7 +96,13 @@ int main(int argc, char *argv[]) {
 
                 if(!strcmp(echoBuffer, "LIST")) {
                     sendFunc(&clntSock, "150");
-                    
+
+                    clntLenData = sizeof(echoClntAddrData);
+                    if((clntSockData = accept(servSockData, (struct sockaddr *) &echoClntAddrData, &clntLenData)) < 0)
+                        dieWithError("accept() failed"); 
+                    else {
+                        sendFunc(&clntSockData, "file transfer!");
+                    }
                 }
 
                 if(!strcmp(echoBuffer, "QUIT")) {
