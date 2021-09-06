@@ -2,16 +2,17 @@
 #include "commands.h"
 
 int main(int argc, char *argv[]) {
-    int run = 1, authChecker = 0;
-    int sock;
+    int authChecker = 0;
+    int sock, fileSock;
     char echoBuffer[RCVBUFSIZE];
     char command[15];
     char commands[COMMAND_COUNTER][12] = {"!", "?", "ascii", "binary", "bye", "cd", "cdup", "close", "delete", "dir", "exit", "get", "hash", "help", "lcd", "ls", "mdelete", "mdir", "mget", "mkdir", "mls", "mput", "open", "passive", "put", "pwd", "rename", "restart", "reset", "recv", "rstatus", "rmdir", "send", "size", "status", "sendport", "quit", "disconnect"};
     
     if(argc > 1) {
         if(checkIP(argv[1])) {
-            openCommand(&sock, argv[1], 1026);
-            checkConnection(&sock, argv[1], echoBuffer);
+            openCommand(&sock, argv[1], PORT);
+            authChecker = checkConnection(&sock, argv[1], echoBuffer);
+            openCommand(&fileSock, argv[1], PORT + 21);
         }
     }
     if (argc > 2) {
@@ -21,7 +22,7 @@ int main(int argc, char *argv[]) {
 
     printf("\n");
     
-    while(run) {
+    while(1) {
         printf("ftp> ");
         scanf("%s", command);
 
@@ -31,7 +32,7 @@ int main(int argc, char *argv[]) {
             if(!strcmp(command, "?") || !strcmp(command, "help"))
                 helpListCommand(commands);
             if(!strcmp(command, "bye") || !strcmp(command, "exit") || !strcmp(command, "quit"))
-                run = 0;
+                return 0;
             if(!strcmp(command, "open")) {
                 char ip[20];
                 
@@ -39,8 +40,9 @@ int main(int argc, char *argv[]) {
                 scanf("%s", ip);
 
                 if(checkIP(ip)) {
-                    openCommand(&sock, ip, 1026);
-                    checkConnection(&sock, ip, echoBuffer);
+                    openCommand(&sock, ip, PORT);
+                    authChecker = checkConnection(&sock, ip, echoBuffer);
+                    openCommand(&fileSock, ip, PORT + 21);
                 }
                 else
                     printf("ftp: %s: Temporary failure in name resolution\n", ip);
@@ -62,7 +64,7 @@ int main(int argc, char *argv[]) {
                 // if(!strcmp(command, "hash"))
                 // if(!strcmp(command, "lcd"))
                 if(!strcmp(command, "ls"))
-                    lsCommand(&sock, echoBuffer);
+                    lsCommand(&sock, &fileSock, echoBuffer);
                 // if(!strcmp(command, "mdelete"))
                 // if(!strcmp(command, "mdir"))
                 // if(!strcmp(command, "mget"))

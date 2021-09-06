@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 
 #define RCVBUFSIZE 255 
-// #define log printf("%s", x);
+#define PORT 1122
 
 void dieWithError(char *str);
 int checkIP(char *str);

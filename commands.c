@@ -14,7 +14,7 @@ int checkTheCommand(char (*commands)[12], char *command) {
     return command_checker;
 }
 
-void authLogin(int *sock, char* echoBuffer) {
+int authLogin(int *sock, char* echoBuffer) {
     char username[RCVBUFSIZE];
 
     printf("Name: ");
@@ -22,16 +22,18 @@ void authLogin(int *sock, char* echoBuffer) {
 
     sendFunc(sock, username);
     receiveFunc(sock, echoBuffer);
-
+    
     if(!strcmp(echoBuffer, "331")) {
         printf("331 Please specify the password\n");
-        authPasswrd(sock, echoBuffer);
+        if(authPasswrd(sock, echoBuffer))
+            return 1;
     }
-    else
-        printf("530 Login incorrect\nLogin failed\n\n");
+
+    printf("530 Login incorrect\nLogin failed\n\n");
+    return 0;
 }
 
-void authPasswrd(int *sock, char* echoBuffer) {
+int authPasswrd(int *sock, char* echoBuffer) {
     char passwrd[RCVBUFSIZE];
 
     printf("Password: ");
@@ -40,27 +42,33 @@ void authPasswrd(int *sock, char* echoBuffer) {
     sendFunc(sock, passwrd);
     receiveFunc(sock, echoBuffer);
 
-    if(!strcmp(echoBuffer, "230")) 
+    if(!strcmp(echoBuffer, "230")) {
         printf("230 Login successful\n");
+        return 1;
+    }
     else {
         printf("530 Password incorrect\n");
         close(*sock);
+        return 0;
     }
 }
 
-void checkConnection(int *sock, char *ip, char *echoBuffer) {
+int checkConnection(int *sock, char *ip, char *echoBuffer) {
     receiveFunc(sock, echoBuffer);
     
     if(!strcmp(echoBuffer, "220")) {
         printf("Connected to %s\n\n", ip);
-        authLogin(sock, echoBuffer);
+        if(authLogin(sock, echoBuffer))
+            return 1;
     }
+
+    return 0;
 }
 
 void openCommand(int *sock, char *ip, unsigned short echoServPort) {
     struct sockaddr_in echoServAddr; 
 
-    if((*sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+    if((*sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         dieWithError("socket() failed");
 
     memset(&echoServAddr, 0, sizeof(echoServAddr));
@@ -100,8 +108,36 @@ void helpListCommand(char (*commands)[12]) {
     printf("\n\n");
 }
 
-void lsCommand(int *sock, char *echoBuffer) {
+void lsCommand(int *sock, int *fileSock, char *echoBuffer) {
     strcpy(echoBuffer, "LIST");
+
     sendFunc(sock, echoBuffer);
     receiveFunc(sock, echoBuffer);
+
+    if(!strcmp(echoBuffer, "150")) {
+        char filename[RCVBUFSIZE];
+        char localBuffer[RCVBUFSIZE];
+
+        // receiveFunc(sock, echoBuffer);
+        // strncpy(filename, echoBuffer, strlen(echoBuffer));
+        // getFile(filesock, echoBuffer);
+
+        
+        receiveFunc(fileSock, localBuffer);
+    }
+    else 
+        printf("Bad status!\n");
+}
+
+void getFile(int *fileSock, char *filename) {
+    int run = 1;
+    char localBuffer[RCVBUFSIZE];
+    // FILE *file = fopen(filename, "w");
+
+    receiveFunc(fileSock, localBuffer);
+
+    // while (run) {
+    //     receiveFunc(fileSock, localBuffer);
+    //     fprintf(file, "%s\n", localBuffer);
+    // }
 }
