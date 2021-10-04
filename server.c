@@ -91,6 +91,21 @@ void signalListener(int sig) {
     exit(0);
 }
 
+void createConnection(int *servSock, unsigned short echoServPort) {
+    struct sockaddr_in echoServAddr; 
+    
+    if ((*servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+        dieWithError("socket() failed");
+      
+    memset(&echoServAddr, 0, sizeof(echoServAddr));
+    echoServAddr.sin_family = AF_INET;
+    echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); 
+    echoServAddr.sin_port = htons(echoServPort); 
+
+    if (bind(*servSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
+        dieWithError("bind() failed");
+}
+
 int main(int argc, char *argv[]) {
     char echoBuffer[RCVBUFSIZE];
     char tmp[RCVBUFSIZE];
