@@ -38,13 +38,35 @@ void sendFunc(int *sock, char *echoString) {
     printf("Send: %s\n", echoString);
 }
 
-void receiveFunc(int *sock, char* echoBuffer) {
+void sendIntFunc(int *sock, int num) {
+    unsigned int numLen = sizeof(num);
+
+    if(send(*sock, &num, numLen, 0) != numLen)
+        dieWithError("send() sent a different number of bytes than expected");
+
+    printf("\tSend code: %i\n\n", num);
+}
+
+int receiveIntFunc(int *sock, int *num) {
+    int bytesRcvd = 0;
+
+    if((bytesRcvd = recv(*sock, num, sizeof(num), 0)) <= 0)
+        dieWithError("recv() failed or connection closed prematurely");
+
+    printf("\tRecv code: %i\n\n", *num);
+
+    return bytesRcvd;   
+}
+
+int receiveFunc(int *sock, char* echoBuffer) {
     int bytesRcvd = 0;
 
     if((bytesRcvd = recv(*sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
         dieWithError("recv() failed or connection closed prematurely");
 
     echoBuffer[bytesRcvd] = '\0';  
-    printf("Received: %s\n", echoBuffer);      
+    printf("%s\n", echoBuffer);
+
+    return bytesRcvd;   
 }
 

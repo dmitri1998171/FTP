@@ -115,15 +115,27 @@ void lsCommand(int *sock, int *fileSock, char *echoBuffer) {
     receiveFunc(sock, echoBuffer);
 
     if(!strcmp(echoBuffer, "150")) {
-        char filename[RCVBUFSIZE];
         char localBuffer[RCVBUFSIZE];
+        receiveFunc(sock, echoBuffer);
 
-        // receiveFunc(sock, echoBuffer);
-        // strncpy(filename, echoBuffer, strlen(echoBuffer));
-        // getFile(filesock, echoBuffer);
+        if(!strcmp(echoBuffer, "220")) {
+            receiveFunc(sock, echoBuffer);
 
-        
-        receiveFunc(fileSock, localBuffer);
+            if(!strcmp(echoBuffer, "226")) {
+                int bytesCounter = 0;
+                
+                // receiveIntFunc(fileSock, &bytesCounter);
+                
+                // while(bytesCounter) {
+                    bytesCounter -= receiveFunc(fileSock, localBuffer);
+                // }
+            }
+            if(!strcmp(echoBuffer, "450")) 
+                printf("File not available!\n");
+            if(!strcmp(echoBuffer, "451")) 
+                printf("Local error!\n");
+        }else 
+            printf("Error creating transmission channel!\n");
     }
     else 
         printf("Bad status!\n");

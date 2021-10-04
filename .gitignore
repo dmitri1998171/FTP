@@ -1,4 +1,5 @@
 .vscode
+.tmp.txt
 client.dSYM
 server.dSYM
 client

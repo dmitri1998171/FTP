@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -13,5 +14,7 @@
 void dieWithError(char *str);
 int checkIP(char *str);
 void sendFunc(int *sock, char *echoString);
-void receiveFunc(int *sock, char* echoBuffer);
+void sendIntFunc(int *sock, int num);
+int receiveIntFunc(int *sock, int* num);
+int receiveFunc(int *sock, char* echoBuffer);
 
