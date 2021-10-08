@@ -91,10 +91,6 @@ void disconnectFunc(int *sock, char *echoBuffer) {
     close(*sock);
 }
 
-void consoleCommand() {
-    printf("\tconsoleCommand\n");
-}
-
 void helpListCommand(char (*commands)[12]) {
     printf("\n");
     
@@ -106,32 +102,6 @@ void helpListCommand(char (*commands)[12]) {
     }
 
     printf("\n\n");
-}
-
-void lsCommand(int *sock, int *fileSock, char *echoBuffer) {
-    strcpy(echoBuffer, "LIST");
-
-    sendFunc(sock, echoBuffer);
-    receiveFunc(sock, echoBuffer);
-
-    if(!strcmp(echoBuffer, "150")) {
-        char localBuffer[RCVBUFSIZE];
-        receiveFunc(sock, echoBuffer);
-
-        if(!strcmp(echoBuffer, "220")) {
-            receiveFunc(sock, echoBuffer);
-
-            if(!strcmp(echoBuffer, "226")) 
-                receiveFunc(fileSock, localBuffer);
-            if(!strcmp(echoBuffer, "450")) 
-                printf("File not available!\n");
-            if(!strcmp(echoBuffer, "451")) 
-                printf("Local error!\n");
-        }else 
-            printf("Error creating transmission channel!\n");
-    }
-    else 
-        printf("Bad status!\n");
 }
 
 void getFile(int *fileSock, char *filename) {
@@ -160,8 +130,8 @@ inline void parseCommandLine(char *command, char **sndArg) {
     }
 }
 
-void pwdCommand(int *sock, int *fileSock, char *echoBuffer) {
-    strcpy(echoBuffer, "PWD");
+void CommandFunc(char *command, int *sock, int *fileSock, char *echoBuffer) {
+    strcpy(echoBuffer, command);
 
     sendFunc(sock, echoBuffer);
     receiveFunc(sock, echoBuffer);

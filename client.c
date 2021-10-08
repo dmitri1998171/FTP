@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
                 // if(!strcmp(command, "hash"))
                 // if(!strcmp(command, "lcd"))
                 if(!strcmp(command, "ls"))
-                    lsCommand(&sock, &fileSock, echoBuffer);
+                    CommandFunc("LIST", &sock, &fileSock, echoBuffer);
                 // if(!strcmp(command, "mdelete"))
                 // if(!strcmp(command, "mdir"))
                 // if(!strcmp(command, "mget"))
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
                 // if(!strcmp(command, "passive"))
                 // if(!strcmp(command, "put"))
                 if(!strcmp(command, "pwd"))
-                    pwdCommand(&sock, &fileSock, echoBuffer);
+                    CommandFunc("PWD", &sock, &fileSock, echoBuffer);
                 // if(!strcmp(command, "rename"))
                 // if(!strcmp(command, "restart"))
                 // if(!strcmp(command, "reset"))

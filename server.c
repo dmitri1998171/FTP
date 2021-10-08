@@ -38,29 +38,11 @@ int authLogin(int *sock, char* echoBuffer, struct auth_struct *logPassList) {
     return 0;
 }
 
-int lsCommand(char *path, int* clntSockData, char buffer[]) {
+int CommandFunc(char* command, int* clntSockData, char buffer[]) {
     FILE *lsptr;
     char localBuffer[RCVBUFSIZE];
 
-        lsptr = popen("ls", "r");
-
-        if(lsptr) {
-            while(fgets(localBuffer, RCVBUFSIZE - 1, lsptr)) 
-                strcat(buffer, localBuffer);
-
-            pclose(lsptr);
-            return 0;
-        }else
-            printf("Error: command not work!\n");
-
-        return 1;
-}
-
-int pwdCommand(int* clntSockData, char buffer[]) {
-    FILE *lsptr;
-    char localBuffer[RCVBUFSIZE];
-
-    lsptr = popen("pwd", "r");
+    lsptr = popen(command, "r");
 
     if(lsptr) {
         while(fgets(localBuffer, RCVBUFSIZE - 1, lsptr)) 
@@ -154,7 +136,7 @@ int main(int argc, char *argv[]) {
                     usleep(500 * 1000);
                     sendFunc(&clntSock, "220");
 
-                    result = lsCommand(path, &clntSockData, dataBuffer);
+                    result = CommandFunc("ls", &clntSockData, dataBuffer);
 
                     if(!result) {
                         sendFunc(&clntSock, "226");                 // Успешно
@@ -174,11 +156,11 @@ int main(int argc, char *argv[]) {
                     usleep(500 * 1000);
                     sendFunc(&clntSock, "220");
 
-                    result = pwdCommand(&clntSockData, dataBuffer);
+                    result = CommandFunc("pwd", &clntSockData, dataBuffer);
 
                     if(!result) {
                         sendFunc(&clntSock, "226");                 // Успешно
-                        sendFunc(&clntSockData, dataBuffer);       // Непосретсвенно отправка полезной нагрузки
+                        sendFunc(&clntSockData, dataBuffer);        // Непосретсвенно отправка полезной нагрузки
                     }
                     else
                         sendFunc(&clntSock, "451");     // Операция прервана, ошибка
