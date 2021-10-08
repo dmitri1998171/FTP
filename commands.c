@@ -3,7 +3,7 @@
 
 int checkTheCommand(char (*commands)[12], char *command) {
     int command_checker = 0;
-    
+
     for(int i = 0; i < COMMAND_COUNTER; i++) {
         if(!strcmp(commands[i], command)) {
             command_checker = 1;
@@ -121,15 +121,8 @@ void lsCommand(int *sock, int *fileSock, char *echoBuffer) {
         if(!strcmp(echoBuffer, "220")) {
             receiveFunc(sock, echoBuffer);
 
-            if(!strcmp(echoBuffer, "226")) {
-                int bytesCounter = 0;
-                
-                // receiveIntFunc(fileSock, &bytesCounter);
-                
-                // while(bytesCounter) {
-                    bytesCounter -= receiveFunc(fileSock, localBuffer);
-                // }
-            }
+            if(!strcmp(echoBuffer, "226")) 
+                receiveFunc(fileSock, localBuffer);
             if(!strcmp(echoBuffer, "450")) 
                 printf("File not available!\n");
             if(!strcmp(echoBuffer, "451")) 
@@ -152,4 +145,43 @@ void getFile(int *fileSock, char *filename) {
     //     receiveFunc(fileSock, localBuffer);
     //     fprintf(file, "%s\n", localBuffer);
     // }
+}
+
+void cdCommand(char *path) {
+    chdir(path);
+}
+
+inline void parseCommandLine(char *command, char **sndArg) {
+    command = strtok(command, " ");
+    *sndArg = strtok(NULL, " ");
+
+    if(*sndArg == NULL) {
+        *sndArg = "";
+    }
+}
+
+void pwdCommand(int *sock, int *fileSock, char *echoBuffer) {
+    strcpy(echoBuffer, "PWD");
+
+    sendFunc(sock, echoBuffer);
+    receiveFunc(sock, echoBuffer);
+
+    if(!strcmp(echoBuffer, "150")) {
+        char localBuffer[RCVBUFSIZE];
+        receiveFunc(sock, echoBuffer);
+
+        if(!strcmp(echoBuffer, "220")) {
+            receiveFunc(sock, echoBuffer);
+
+            if(!strcmp(echoBuffer, "226")) {
+                printf("pwd: ");
+                receiveFunc(fileSock, localBuffer);
+            }
+            if(!strcmp(echoBuffer, "451")) 
+                printf("Local error!\n");
+        }else 
+            printf("Error creating transmission channel!\n");
+    }
+    else 
+        printf("Bad status!\n");
 }

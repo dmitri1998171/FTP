@@ -4,8 +4,11 @@
 int main(int argc, char *argv[]) {
     int authChecker = 0;
     int sock, fileSock;
-    char echoBuffer[RCVBUFSIZE];
+    char *sndArg;
     char command[15];
+    char path[RCVBUFSIZE];
+    char echoBuffer[RCVBUFSIZE];
+    // char *fstCommand, *sndCommand;
     char commands[COMMAND_COUNTER][12] = {"!", "?", "ascii", "binary", "bye", "cd", "cdup", "close", "delete", "dir", "exit", "get", "hash", "help", "lcd", "ls", "mdelete", "mdir", "mget", "mkdir", "mls", "mput", "open", "passive", "put", "pwd", "rename", "restart", "reset", "recv", "rstatus", "rmdir", "send", "size", "status", "sendport", "quit", "disconnect"};
     
     if(argc > 1) {
@@ -22,10 +25,15 @@ int main(int argc, char *argv[]) {
 
     printf("\n");
     
+    chdir(".");
+    getcwd(path, RCVBUFSIZE);
+
     while(1) {
         printf("ftp> ");
-        scanf("%s", command);
+        fgets_wrapper(command, RCVBUFSIZE - 1, stdin);
 
+        parseCommandLine(command, &sndArg);
+            
         if(checkTheCommand(commands, command)) {
             if(!strcmp(command, "!"))
                 consoleCommand();
@@ -52,7 +60,8 @@ int main(int argc, char *argv[]) {
             // if(!strcmp(command, "binary"))
         
             if(authChecker) {
-                // if(!strcmp(command, "cd"))
+                if(!strcmp(command, "cd"))
+                    cdCommand(sndArg);
                 // if(!strcmp(command, "cdup"))
                 // if(!strcmp(command, "delete"))
                 if(!strcmp(command, "disconnect") || !strcmp(command, "close")) {
@@ -73,6 +82,8 @@ int main(int argc, char *argv[]) {
                 // if(!strcmp(command, "mput"))
                 // if(!strcmp(command, "passive"))
                 // if(!strcmp(command, "put"))
+                if(!strcmp(command, "pwd"))
+                    pwdCommand(&sock, &fileSock, echoBuffer);
                 // if(!strcmp(command, "rename"))
                 // if(!strcmp(command, "restart"))
                 // if(!strcmp(command, "reset"))

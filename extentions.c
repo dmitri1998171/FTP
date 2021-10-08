@@ -70,3 +70,14 @@ int receiveFunc(int *sock, char* echoBuffer) {
     return bytesRcvd;   
 }
 
+/*
+Враппер заменяет символ перехода на новую 
+строку (\n) на символ конца строки (\0)
+*/ 
+char *fgets_wrapper(char *buffer, size_t buflen, FILE *fp) {
+    if (fgets(buffer, buflen, fp) != 0) {
+        buffer[strcspn(buffer, "\n")] = '\0';
+        return buffer;
+    }
+    return 0;
+}

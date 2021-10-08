@@ -38,50 +38,40 @@ int authLogin(int *sock, char* echoBuffer, struct auth_struct *logPassList) {
     return 0;
 }
 
-void createConnection(int *servSock, unsigned short echoServPort) {
-    struct sockaddr_in echoServAddr; 
-    
-    if ((*servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-        dieWithError("socket() failed");
-      
-    memset(&echoServAddr, 0, sizeof(echoServAddr));
-    echoServAddr.sin_family = AF_INET;
-    echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); 
-    echoServAddr.sin_port = htons(echoServPort); 
-
-    if (bind(*servSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
-        dieWithError("bind() failed");
-}
-
-int lsCommand(char *path, int* clntSockData, char buffer[], int *bytesCounter) {
+int lsCommand(char *path, int* clntSockData, char buffer[]) {
     FILE *lsptr;
-    int fptr;
     char localBuffer[RCVBUFSIZE];
 
-    // fptr = open(TMP_FILE, O_CREAT|O_RDWR,S_IREAD|S_IWRITE);
-
-    // if(fptr) {
-        // strcat(path, "/ls");
-        // printf("path: %s\n", path);
         lsptr = popen("ls", "r");
 
         if(lsptr) {
-            while(fgets(localBuffer, RCVBUFSIZE - 1, lsptr)) {
-                // *bytesCounter = write(fptr, localBuffer, strlen(localBuffer));
+            while(fgets(localBuffer, RCVBUFSIZE - 1, lsptr)) 
                 strcat(buffer, localBuffer);
-            }
 
             pclose(lsptr);
-            // close(fptr);
             return 0;
         }else
-            printf("Error: ls command work!\n");
+            printf("Error: command not work!\n");
 
-        return 2;
-    // }else
-    //     printf("Error: file open!\n");
+        return 1;
+}
 
-    // return 1;
+int pwdCommand(int* clntSockData, char buffer[]) {
+    FILE *lsptr;
+    char localBuffer[RCVBUFSIZE];
+
+    lsptr = popen("pwd", "r");
+
+    if(lsptr) {
+        while(fgets(localBuffer, RCVBUFSIZE - 1, lsptr)) 
+            strcat(buffer, localBuffer);
+
+        pclose(lsptr);
+        return 0;
+    }else
+        printf("Error: command not work!\n");
+
+    return 1;
 }
 
 void signalListener(int sig) {
@@ -94,7 +84,7 @@ void signalListener(int sig) {
 void createConnection(int *servSock, unsigned short echoServPort) {
     struct sockaddr_in echoServAddr; 
     
-    if ((*servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+    if ((*servSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         dieWithError("socket() failed");
       
     memset(&echoServAddr, 0, sizeof(echoServAddr));
@@ -107,11 +97,13 @@ void createConnection(int *servSock, unsigned short echoServPort) {
 }
 
 int main(int argc, char *argv[]) {
-    char echoBuffer[RCVBUFSIZE];
-    char tmp[RCVBUFSIZE];
     char *path = "./";
     int authChecker = 0;
+    int result = 0;
     int recvMsgSize;
+    char tmp[RCVBUFSIZE];
+    char dataBuffer[RCVBUFSIZE];
+    char echoBuffer[RCVBUFSIZE];
     struct sockaddr_in echoClntAddr, echoClntAddrData; 
     unsigned short echoServPort;
     unsigned int clntLen, clntLenData;
@@ -162,22 +154,32 @@ int main(int argc, char *argv[]) {
                     usleep(500 * 1000);
                     sendFunc(&clntSock, "220");
 
-                    char localBuffer[RCVBUFSIZE];
-                    int result, bytesCounter = 0;
-
-                    result = lsCommand(path, &clntSockData, localBuffer, &bytesCounter);
-
-                    printf("localBuffer: %s\n", localBuffer);
+                    result = lsCommand(path, &clntSockData, dataBuffer);
 
                     if(!result) {
-                        sendFunc(&clntSock, "226");     // Успешно
-
-                        // sendIntFunc(&clntSockData, &bytesCounter);  // Кол-во байт, которое будет отправлено
-                        // usleep(500 * 1000);
-                        sendFunc(&clntSockData, localBuffer);       // Непосретсвенно отправка полезной нагрузки
+                        sendFunc(&clntSock, "226");                 // Успешно
+                        sendFunc(&clntSockData, dataBuffer);       // Непосретсвенно отправка полезной нагрузки
                     }
-                    // else if(result == 1)
-                    //     sendFunc(&clntSock, "450");     // Файл недоступен
+                    else
+                        sendFunc(&clntSock, "451");     // Операция прервана, ошибка
+                }
+
+                if(!strcmp(echoBuffer, "PWD")) {
+                    sendFunc(&clntSock, "150");
+
+                    clntLenData = sizeof(echoClntAddrData);
+                    if((clntSockData = accept(servSockData, (struct sockaddr *) &echoClntAddrData, &clntLenData)) < 0)
+                        dieWithError("accept() failed"); 
+
+                    usleep(500 * 1000);
+                    sendFunc(&clntSock, "220");
+
+                    result = pwdCommand(&clntSockData, dataBuffer);
+
+                    if(!result) {
+                        sendFunc(&clntSock, "226");                 // Успешно
+                        sendFunc(&clntSockData, dataBuffer);       // Непосретсвенно отправка полезной нагрузки
+                    }
                     else
                         sendFunc(&clntSock, "451");     // Операция прервана, ошибка
                 }

@@ -13,3 +13,7 @@ void consoleCommand();
 void helpListCommand(char (*commands)[12]);
 void lsCommand(int *sock, int *filesock, char *echoBuffer);
 void getFile(int *fileSock, char *filename);
+void cdCommand(char *path);
+void parseCommandLine(char *command, char **sndArg);
+void pwdCommand(int *sock, int *fileSock, char *echoBuffer);
+

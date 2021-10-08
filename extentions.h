@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <dirent.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -17,4 +18,4 @@ void sendFunc(int *sock, char *echoString);
 void sendIntFunc(int *sock, int num);
 int receiveIntFunc(int *sock, int* num);
 int receiveFunc(int *sock, char* echoBuffer);
-
+char *fgets_wrapper(char *buffer, size_t buflen, FILE *fp);
