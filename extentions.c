@@ -2,7 +2,7 @@
 
 #define SERVER_CMD_COUNTER 28
 
-char server_cmds[SERVER_CMD_COUNTER][12] = {"ABOR", "ACCT", "ACCT", "CWD", "DELE", "HELP", "LIST", "MKD", "MODE", "NLST", "PASS", "PASV", "PORT", "PWD", "QUIT", "REIN", "RMD", "RNFR", "RNTO", "SITE", "SMNT", "STAT", "STOR", "STOU", "TYPE", "USER", "SYN", "ACK"};
+char server_cmds[SERVER_CMD_COUNTER][12] = {"ABOR", "ACCT", "ACCT", "CD", "DELE", "HELP", "LIST", "MKD", "MODE", "NLST", "PASS", "PASV", "PORT", "PWD", "QUIT", "REIN", "RMD", "RNFR", "RNTO", "SITE", "SMNT", "STAT", "STOR", "STOU", "TYPE", "USER", "SYN", "ACK"};
 
 void dieWithError(char *str) {
     printf("%s\n", str);
@@ -56,6 +56,13 @@ int receiveIntFunc(int *sock, int *num) {
     printf("\tRecv code: %i\n\n", *num);
 
     return bytesRcvd;   
+}
+
+void sendResult(int *sock, int result) {
+    if(!result) 
+        sendFunc(sock, "226");                 // Успешно
+    else
+        sendFunc(sock, "451");                 // Операция прервана, ошибка
 }
 
 int receiveFunc(int *sock, char* echoBuffer) {

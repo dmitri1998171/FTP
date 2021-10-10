@@ -42,6 +42,10 @@ int CommandFunc(char* command, int* clntSockData, char buffer[]) {
     FILE *lsptr;
     char localBuffer[RCVBUFSIZE];
 
+    // memset(buffer, 0, sizeof(*buffer));
+    buffer[0] = '\0';
+
+
     lsptr = popen(command, "r");
 
     if(lsptr) {
@@ -73,6 +77,9 @@ void createConnection(int *servSock, unsigned short echoServPort) {
     echoServAddr.sin_family = AF_INET;
     echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); 
     echoServAddr.sin_port = htons(echoServPort); 
+
+    const int optval = 1;
+    setsockopt(*servSock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
     if (bind(*servSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         dieWithError("bind() failed");
@@ -115,55 +122,45 @@ int main(int argc, char *argv[]) {
         signal(SIGINT, signalListener);
 
         clntLen = sizeof(echoClntAddr);
-        if((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, &clntLen)) < 0)
+        if((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, &clntLen)) < 0) {
+            sendFunc(&clntSock, "426");
             dieWithError("accept() failed");
+        }
         
         printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
         sendFunc(&clntSock, "220");
         authChecker = authLogin(&clntSock, echoBuffer, logPassList);
 
         if(authChecker) {
+            clntLenData = sizeof(echoClntAddrData);
+            if((clntSockData = accept(servSockData, (struct sockaddr *) &echoClntAddrData, &clntLenData)) < 0) {
+                sendFunc(&clntSock, "426");
+                dieWithError("accept() failed"); 
+            }
+
+            usleep(500 * 1000);
+            sendFunc(&clntSockData, "220");
+
             while(1) {
                 receiveFunc(&clntSock, echoBuffer);
 
                 if(!strcmp(echoBuffer, "LIST")) {
-                    sendFunc(&clntSock, "150");
-
-                    clntLenData = sizeof(echoClntAddrData);
-                    if((clntSockData = accept(servSockData, (struct sockaddr *) &echoClntAddrData, &clntLenData)) < 0)
-                        dieWithError("accept() failed"); 
-
-                    usleep(500 * 1000);
-                    sendFunc(&clntSock, "220");
-
                     result = CommandFunc("ls", &clntSockData, dataBuffer);
-
-                    if(!result) {
-                        sendFunc(&clntSock, "226");                 // Успешно
-                        sendFunc(&clntSockData, dataBuffer);       // Непосретсвенно отправка полезной нагрузки
-                    }
-                    else
-                        sendFunc(&clntSock, "451");     // Операция прервана, ошибка
+                    sendResult(&clntSock, result);
+                    sendFunc(&clntSockData, dataBuffer);
                 }
 
                 if(!strcmp(echoBuffer, "PWD")) {
-                    sendFunc(&clntSock, "150");
-
-                    clntLenData = sizeof(echoClntAddrData);
-                    if((clntSockData = accept(servSockData, (struct sockaddr *) &echoClntAddrData, &clntLenData)) < 0)
-                        dieWithError("accept() failed"); 
-
-                    usleep(500 * 1000);
-                    sendFunc(&clntSock, "220");
-
                     result = CommandFunc("pwd", &clntSockData, dataBuffer);
+                    sendResult(&clntSock, result);
+                    sendFunc(&clntSockData, dataBuffer);
+                }
 
-                    if(!result) {
-                        sendFunc(&clntSock, "226");                 // Успешно
-                        sendFunc(&clntSockData, dataBuffer);        // Непосретсвенно отправка полезной нагрузки
-                    }
-                    else
-                        sendFunc(&clntSock, "451");     // Операция прервана, ошибка
+                if(!strcmp(echoBuffer, "CD")) {
+                    receiveFunc(&clntSock, echoBuffer);
+
+                    result = chdir(echoBuffer);
+                    sendResult(&clntSock, result);
                 }
 
                 if(!strcmp(echoBuffer, "QUIT")) {

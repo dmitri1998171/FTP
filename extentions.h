@@ -17,5 +17,6 @@ int checkIP(char *str);
 void sendFunc(int *sock, char *echoString);
 void sendIntFunc(int *sock, int num);
 int receiveIntFunc(int *sock, int* num);
+void sendResult(int *sock, int result);
 int receiveFunc(int *sock, char* echoBuffer);
 char *fgets_wrapper(char *buffer, size_t buflen, FILE *fp);

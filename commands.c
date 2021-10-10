@@ -58,11 +58,25 @@ int checkConnection(int *sock, char *ip, char *echoBuffer) {
     
     if(!strcmp(echoBuffer, "220")) {
         printf("Connected to %s\n\n", ip);
-        if(authLogin(sock, echoBuffer))
-            return 1;
+        return 1;
     }
+    else
+        dieWithError("Failed to connect!");
 
     return 0;
+}
+
+void ValidateConnection(int *sock, int *fileSock, char *ip, char *echoBuffer, int *authChecker, int *dataChecker) {
+    if(checkIP(ip)) {
+        openCommand(sock, ip, PORT);
+        checkConnection(sock, ip, echoBuffer);
+        *authChecker = authLogin(sock, echoBuffer);
+
+        openCommand(fileSock, ip, PORT + 21);
+        *dataChecker = checkConnection(fileSock, ip, echoBuffer);
+    }
+    else
+        printf("ftp: %s: Temporary failure in name resolution\n", ip);
 }
 
 void openCommand(int *sock, char *ip, unsigned short echoServPort) {
@@ -80,7 +94,7 @@ void openCommand(int *sock, char *ip, unsigned short echoServPort) {
         dieWithError("connect() failed");
 }
 
-void disconnectFunc(int *sock, char *echoBuffer) {
+void disconnectFunc(int *sock, int *fileSock, char *echoBuffer) {
     sendFunc(sock, "QUIT");
 
     receiveFunc(sock, echoBuffer);
@@ -89,6 +103,7 @@ void disconnectFunc(int *sock, char *echoBuffer) {
         printf("Disconnect complete!\n\n");
 
     close(*sock);
+    close(*fileSock);
 }
 
 void helpListCommand(char (*commands)[12]) {
@@ -117,8 +132,11 @@ void getFile(int *fileSock, char *filename) {
     // }
 }
 
-void cdCommand(char *path) {
-    chdir(path);
+void cdCommand(int *sock, char *echoBuffer, char *path) {
+    sendFunc(sock, "CD");
+    usleep(500*1000);
+    sendFunc(sock, path);
+    receiveFunc(sock, echoBuffer);
 }
 
 inline void parseCommandLine(char *command, char **sndArg) {
@@ -126,32 +144,27 @@ inline void parseCommandLine(char *command, char **sndArg) {
     *sndArg = strtok(NULL, " ");
 
     if(*sndArg == NULL) {
-        *sndArg = "";
+        *sndArg = ".";
     }
 }
 
 void CommandFunc(char *command, int *sock, int *fileSock, char *echoBuffer) {
+    char localBuffer[RCVBUFSIZE];
     strcpy(echoBuffer, command);
 
     sendFunc(sock, echoBuffer);
+    // receiveFunc(sock, echoBuffer);
+
+    // if(!strcmp(echoBuffer, "150")) {
+    //     receiveFunc(sock, echoBuffer);
+
+    //     if(!strcmp(echoBuffer, "220")) {
     receiveFunc(sock, echoBuffer);
 
-    if(!strcmp(echoBuffer, "150")) {
-        char localBuffer[RCVBUFSIZE];
-        receiveFunc(sock, echoBuffer);
-
-        if(!strcmp(echoBuffer, "220")) {
-            receiveFunc(sock, echoBuffer);
-
-            if(!strcmp(echoBuffer, "226")) {
-                printf("pwd: ");
-                receiveFunc(fileSock, localBuffer);
-            }
-            if(!strcmp(echoBuffer, "451")) 
-                printf("Local error!\n");
-        }else 
-            printf("Error creating transmission channel!\n");
+    if(!strcmp(echoBuffer, "226")) {
+        printf("pwd: ");
+        receiveFunc(fileSock, localBuffer);
     }
-    else 
-        printf("Bad status!\n");
+    if(!strcmp(echoBuffer, "451")) 
+        printf("Local error!\n");
 }
