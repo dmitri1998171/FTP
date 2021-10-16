@@ -1,9 +1,6 @@
 #include "extentions.h" 
 
 #define MAXPENDING 5 
-#define TMP_FILE ".tmp.txt"
-
-int servSock, clntSock, servSockData, clntSockData;
 
 struct auth_struct {
     char login[RCVBUFSIZE];
@@ -42,9 +39,7 @@ int CommandFunc(char* command, int* clntSockData, char buffer[]) {
     FILE *lsptr;
     char localBuffer[RCVBUFSIZE];
 
-    // memset(buffer, 0, sizeof(*buffer));
     buffer[0] = '\0';
-
 
     lsptr = popen(command, "r");
 
@@ -58,13 +53,6 @@ int CommandFunc(char* command, int* clntSockData, char buffer[]) {
         printf("Error: command not work!\n");
 
     return 1;
-}
-
-void signalListener(int sig) {
-    system("rm -rf .tmp.txt");
-    close(clntSock);
-    close(clntSockData);
-    exit(0);
 }
 
 void createConnection(int *servSock, unsigned short echoServPort) {
@@ -90,6 +78,7 @@ int main(int argc, char *argv[]) {
     int authChecker = 0;
     int result = 0;
     int recvMsgSize;
+    int servSock, clntSock, servSockData, clntSockData;
     char tmp[RCVBUFSIZE];
     char dataBuffer[RCVBUFSIZE];
     char echoBuffer[RCVBUFSIZE];
@@ -119,8 +108,6 @@ int main(int argc, char *argv[]) {
         dieWithError("listen2() failed");
 
     while(1) {
-        signal(SIGINT, signalListener);
-
         clntLen = sizeof(echoClntAddr);
         if((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, &clntLen)) < 0) {
             sendFunc(&clntSock, "426");

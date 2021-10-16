@@ -12,11 +12,11 @@ Project Description
 
 ### In Progress
 
-- [ ] переписать обработчик сигнала  
 - [ ] реализация команд пользователя  
 
 ### Done ✓
 
+- [x] переписать обработчик сигнала  
 - [x] cd command  
 - [x] pwd command  
 - [x] ls command  
