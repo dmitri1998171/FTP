@@ -38,6 +38,18 @@ void sendFunc(int *sock, char *echoString) {
     printf("Send: %s\n", echoString);
 }
 
+int receiveFunc(int *sock, char* echoBuffer) {
+    int bytesRcvd = 0;
+
+    if((bytesRcvd = recv(*sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
+        dieWithError("recv() failed or connection closed prematurely");
+
+    echoBuffer[bytesRcvd] = '\0';  
+    printf("%s\n", echoBuffer);
+
+    return bytesRcvd;   
+}
+
 void sendIntFunc(int *sock, int num) {
     unsigned int numLen = sizeof(num);
 
@@ -65,16 +77,13 @@ void sendResult(int *sock, int result) {
         sendFunc(sock, "451");                 // Операция прервана, ошибка
 }
 
-int receiveFunc(int *sock, char* echoBuffer) {
-    int bytesRcvd = 0;
+void recvResult(int *sock,  int *fileSock, char* echoBuffer, char* localBuffer) {
+    receiveFunc(sock, echoBuffer);
 
-    if((bytesRcvd = recv(*sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
-        dieWithError("recv() failed or connection closed prematurely");
-
-    echoBuffer[bytesRcvd] = '\0';  
-    printf("%s\n", echoBuffer);
-
-    return bytesRcvd;   
+    if(!strcmp(echoBuffer, "226")) 
+        receiveFunc(fileSock, localBuffer); // Успешно
+    if(!strcmp(echoBuffer, "451"))
+        printf("Local error!\n");           // Операция прервана, ошибка
 }
 
 /*
@@ -88,3 +97,22 @@ char *fgets_wrapper(char *buffer, size_t buflen, FILE *fp) {
     }
     return 0;
 }
+
+int readFile(char *filename, char *buffer) {
+    unsigned long fileSize = 0;
+    FILE *img = fopen(filename, "r");   // "rb"
+
+    while (fgets(buffer, RCVBUFSIZE, img) != NULL) 
+        fileSize += strlen(buffer);
+
+    fclose(img);
+    return fileSize;
+}
+
+void writeFile(char *filename, char *buffer) {
+    FILE *img = fopen(filename, "w");
+    fputs(buffer, img);
+    fclose(img);
+}
+
+

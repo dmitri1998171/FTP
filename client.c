@@ -34,7 +34,9 @@ int main(int argc, char *argv[]) {
             if(!strcmp(command, "?") || !strcmp(command, "help"))
                 helpListCommand(commands);
             if(!strcmp(command, "bye") || !strcmp(command, "exit") || !strcmp(command, "quit")) {
-                disconnectFunc(&sock, &fileSock, echoBuffer);
+                if(authChecker) 
+                    disconnectFunc(&sock, &fileSock, echoBuffer);
+                    
                 exit(0);
             }
             if(!strcmp(command, "open")) {
@@ -59,7 +61,8 @@ int main(int argc, char *argv[]) {
                     authChecker = 0;
                 }
                 // if(!strcmp(command, "dir"))
-                // if(!strcmp(command, "get"))
+                if(!strcmp(command, "get"))
+                    getFunc(&sock, &fileSock, echoBuffer, sndArg);
                 // if(!strcmp(command, "hash"))
                 // if(!strcmp(command, "lcd"))
                 if(!strcmp(command, "ls"))

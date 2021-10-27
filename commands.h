@@ -14,3 +14,4 @@ void getFile(int *fileSock, char *filename);
 void cdCommand(int *sock, char *echoBuffer, char *path);
 void parseCommandLine(char *command, char **sndArg);
 void CommandFunc(char *command, int *sock, int *fileSock, char *echoBuffer);
+int getFunc(int *sock, int *fileSock, char *echoBuffer, char* filename);

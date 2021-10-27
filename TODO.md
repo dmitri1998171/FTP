@@ -12,10 +12,12 @@ Project Description
 
 ### In Progress
 
+- [ ] get command (binary)  
 - [ ] реализация команд пользователя  
 
 ### Done ✓
 
+- [x] get command (text)  
 - [x] переписать обработчик сигнала  
 - [x] cd command  
 - [x] pwd command  

@@ -35,7 +35,7 @@ int authLogin(int *sock, char* echoBuffer, struct auth_struct *logPassList) {
     return 0;
 }
 
-int CommandFunc(char* command, int* clntSockData, char buffer[]) {
+int CommandFunc(char* command, char buffer[]) {
     FILE *lsptr;
     char localBuffer[RCVBUFSIZE];
 
@@ -73,18 +73,29 @@ void createConnection(int *servSock, unsigned short echoServPort) {
         dieWithError("bind() failed");
 }
 
+int checkTheFile(char *filename) {
+    char localBuffer[RCVBUFSIZE];
+
+    CommandFunc("ls", localBuffer);
+    for(int i = 0; i < strlen(localBuffer); i++)
+        if(!strstr(filename, localBuffer))
+            return 0;
+
+    return 1;
+}
+
 int main(int argc, char *argv[]) {
     char *path = "./";
+    char *filename;
     int authChecker = 0;
     int result = 0;
-    int recvMsgSize;
     int servSock, clntSock, servSockData, clntSockData;
-    char tmp[RCVBUFSIZE];
     char dataBuffer[RCVBUFSIZE];
     char echoBuffer[RCVBUFSIZE];
     struct sockaddr_in echoClntAddr, echoClntAddrData; 
     unsigned short echoServPort;
     unsigned int clntLen, clntLenData;
+    unsigned long fileSize;
 
     struct auth_struct logPassList[3] = {"admin",     "admin", 
                                          "anonymous", "",
@@ -132,13 +143,13 @@ int main(int argc, char *argv[]) {
                 receiveFunc(&clntSock, echoBuffer);
 
                 if(!strcmp(echoBuffer, "LIST")) {
-                    result = CommandFunc("ls", &clntSockData, dataBuffer);
+                    result = CommandFunc("ls", dataBuffer);
                     sendResult(&clntSock, result);
                     sendFunc(&clntSockData, dataBuffer);
                 }
 
                 if(!strcmp(echoBuffer, "PWD")) {
-                    result = CommandFunc("pwd", &clntSockData, dataBuffer);
+                    result = CommandFunc("pwd", dataBuffer);
                     sendResult(&clntSock, result);
                     sendFunc(&clntSockData, dataBuffer);
                 }
@@ -148,6 +159,25 @@ int main(int argc, char *argv[]) {
 
                     result = chdir(echoBuffer);
                     sendResult(&clntSock, result);
+                }
+
+                if(!strcmp(echoBuffer, "GET")) {
+                    receiveFunc(&clntSock, echoBuffer);     // Получаем имя файла
+
+                    result = checkTheFile(echoBuffer);      // Проверка что файл существует
+                    sendResult(&clntSock, result);
+
+                    if(!result) {
+                        char fileSiz[RCVBUFSIZE];
+
+                        fileSize = readFile(echoBuffer, dataBuffer);  // Читаем файл
+
+                        snprintf(fileSiz, sizeof(fileSiz), "%lu", fileSize);
+                        sendFunc(&clntSock, fileSiz);           // Отправляем размер
+
+                        usleep(500 * 1000);
+                        printf("\n\nsent bytes: %zi\ndataBuffer: %s\nfileSize: %lu\n\n", send(clntSockData, dataBuffer, fileSize, 0), dataBuffer, fileSize);    // Отправка самого файла
+                    }
                 }
 
                 if(!strcmp(echoBuffer, "QUIT")) {

@@ -150,21 +150,44 @@ inline void parseCommandLine(char *command, char **sndArg) {
 
 void CommandFunc(char *command, int *sock, int *fileSock, char *echoBuffer) {
     char localBuffer[RCVBUFSIZE];
-    strcpy(echoBuffer, command);
+    // strcpy(echoBuffer, command);
 
-    sendFunc(sock, echoBuffer);
-    // receiveFunc(sock, echoBuffer);
-
-    // if(!strcmp(echoBuffer, "150")) {
-    //     receiveFunc(sock, echoBuffer);
-
-    //     if(!strcmp(echoBuffer, "220")) {
+    sendFunc(sock, command);
     receiveFunc(sock, echoBuffer);
 
-    if(!strcmp(echoBuffer, "226")) {
-        printf("pwd: ");
+    if(!strcmp(echoBuffer, "226")) 
         receiveFunc(fileSock, localBuffer);
-    }
+    
     if(!strcmp(echoBuffer, "451")) 
         printf("Local error!\n");
+}
+
+int getFunc(int *sock, int *fileSock, char *echoBuffer, char *filename) {
+    unsigned long fileSize = 0;
+
+    sendFunc(sock, "GET");
+    usleep(500 * 1000);
+
+    sendFunc(sock, filename);         // Отправка имени на сервер
+    receiveFunc(sock, echoBuffer);      // Проверка существует ли такой файл
+
+    if(!strcmp(echoBuffer, "226")) 
+        receiveFunc(sock, echoBuffer);  // Получаем размер файла
+    
+    if(!strcmp(echoBuffer, "451")) {
+        printf("Local error!\n");
+        return 1;
+    }
+
+    fileSize = atol(echoBuffer);
+
+    char *buffer = malloc(sizeof(char)*fileSize);
+    printf("fileSize: %lu\tsizeof(buffer): %lu\tstrlen(buffer): %lu\n", fileSize, sizeof(buffer), strlen(buffer));
+   
+    recv(*fileSock, buffer, fileSize, 0); // Получем сам файл
+    // printf("recv: %s\n", buffer);
+    
+    writeFile(filename, buffer);
+
+    return 0;
 }
