@@ -4,6 +4,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -23,3 +24,5 @@ void recvResult(int *sock,  int *fileSock, char* echoBuffer, char* localBuffer);
 char *fgets_wrapper(char *buffer, size_t buflen, FILE *fp);
 int readFile(char *filename, char *buffer);
 void writeFile(char *filename, char *buffer); 
+void sendFileFunc(int *sock, char *filename);
+void receiveFile(int *sock, char *filename);

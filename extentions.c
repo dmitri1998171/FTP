@@ -115,4 +115,49 @@ void writeFile(char *filename, char *buffer) {
     fclose(img);
 }
 
+void sendFileFunc(int *sock, char *filename) {
+    int file_fd, num_read;
+    char c;
 
+    //Open the specified file:
+    if((file_fd = open(filename, O_RDONLY)) == -1) 
+        dieWithError("Error opening file");
+    
+    //Transfer file:
+    while((num_read = read(file_fd, &c, 1)) > 0) {
+        if(write(*sock, &c, 1) != 1) 
+            dieWithError("Error writing to data socket");
+    }
+
+    if(num_read == -1) 
+        dieWithError("Error reading from file");
+}
+
+void receiveFile(int *sock, char *filename) {
+    int file_fd, num_read;
+    char buffer[RCVBUFSIZE];
+
+    //If data comes across the connection:
+    if((num_read = read(*sock, buffer, RCVBUFSIZE)) > 0) {
+
+        //Create a file:
+        if((file_fd = open(filename, O_CREAT | O_EXCL | O_WRONLY, 0660)) == -1) 
+            dieWithError("Error creating file");
+        
+        //Write to the file:
+        do {
+            if(write(file_fd, buffer, num_read) == -1) 
+                dieWithError("Error writing to file");
+        } while((num_read = read(*sock, buffer, RCVBUFSIZE)) > 0);
+
+        //Error reading from connection:
+        if(num_read == -1) 
+            dieWithError("Error reading file from data connection");
+                    
+        printf("File received: %s\n", filename);
+    }
+
+    //Error reading from connection:
+    if(num_read == -1) 
+        dieWithError("Error reading file from data connection");
+}

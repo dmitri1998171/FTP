@@ -166,9 +166,10 @@ int getFunc(int *sock, int *fileSock, char *echoBuffer, char *filename) {
     unsigned long fileSize = 0;
 
     sendFunc(sock, "GET");
+    
     usleep(500 * 1000);
 
-    sendFunc(sock, filename);         // Отправка имени на сервер
+    sendFunc(sock, filename);           // Отправка имени на сервер
     receiveFunc(sock, echoBuffer);      // Проверка существует ли такой файл
 
     if(!strcmp(echoBuffer, "226")) 
@@ -180,14 +181,7 @@ int getFunc(int *sock, int *fileSock, char *echoBuffer, char *filename) {
     }
 
     fileSize = atol(echoBuffer);
-
-    char *buffer = malloc(sizeof(char)*fileSize);
-    printf("fileSize: %lu\tsizeof(buffer): %lu\tstrlen(buffer): %lu\n", fileSize, sizeof(buffer), strlen(buffer));
-   
-    recv(*fileSock, buffer, fileSize, 0); // Получем сам файл
-    // printf("recv: %s\n", buffer);
-    
-    writeFile(filename, buffer);
+    receiveFile(sock, filename);
 
     return 0;
 }

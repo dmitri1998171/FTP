@@ -174,9 +174,10 @@ int main(int argc, char *argv[]) {
 
                         snprintf(fileSiz, sizeof(fileSiz), "%lu", fileSize);
                         sendFunc(&clntSock, fileSiz);           // Отправляем размер
-
+                        
                         usleep(500 * 1000);
-                        printf("\n\nsent bytes: %zi\ndataBuffer: %s\nfileSize: %lu\n\n", send(clntSockData, dataBuffer, fileSize, 0), dataBuffer, fileSize);    // Отправка самого файла
+
+                        sendFileFunc(&clntSock, echoBuffer);
                     }
                 }
 

@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     
     if(argc == 2) 
         ValidateConnection(&sock, &fileSock, argv[1], echoBuffer, &authChecker, &dataChecker);
-    if (argc > 2) {
+    if (argc != 2) {
         fprintf(stderr, "Usage:  %s [Server IP]\n", argv[0]);
         exit(1);
     }
@@ -29,8 +29,6 @@ int main(int argc, char *argv[]) {
         parseCommandLine(command, &sndArg);
             
         if(checkTheCommand(commands, command)) {
-            // if(!strcmp(command, "!"))
-            //     consoleCommand();
             if(!strcmp(command, "?") || !strcmp(command, "help"))
                 helpListCommand(commands);
             if(!strcmp(command, "bye") || !strcmp(command, "exit") || !strcmp(command, "quit")) {
@@ -47,41 +45,23 @@ int main(int argc, char *argv[]) {
 
                 ValidateConnection(&sock, &fileSock, ip, echoBuffer, &authChecker, &dataChecker);
             }
-
-            // if(!strcmp(command, "ascii"))
-            // if(!strcmp(command, "binary"))
         
             if(authChecker) {
                 if(!strcmp(command, "cd"))
                     cdCommand(&sock, echoBuffer, sndArg);
-                // if(!strcmp(command, "cdup"))
-                // if(!strcmp(command, "delete"))
                 if(!strcmp(command, "disconnect") || !strcmp(command, "close")) {
                     disconnectFunc(&sock, &fileSock, echoBuffer);
                     authChecker = 0;
                 }
-                // if(!strcmp(command, "dir"))
                 if(!strcmp(command, "get"))
                     getFunc(&sock, &fileSock, echoBuffer, sndArg);
-                // if(!strcmp(command, "hash"))
-                // if(!strcmp(command, "lcd"))
                 if(!strcmp(command, "ls"))
                     CommandFunc("LIST", &sock, &fileSock, echoBuffer);
-                // if(!strcmp(command, "mdelete"))
-                // if(!strcmp(command, "mdir"))
-                // if(!strcmp(command, "mget"))
                 // if(!strcmp(command, "mkdir"))
-                // if(!strcmp(command, "mls"))
-                // if(!strcmp(command, "mput"))
-                // if(!strcmp(command, "passive"))
-                // if(!strcmp(command, "put"))
                 if(!strcmp(command, "pwd"))
                     CommandFunc("PWD", &sock, &fileSock, echoBuffer);
                 // if(!strcmp(command, "rename"))
-                // if(!strcmp(command, "restart"))
-                // if(!strcmp(command, "reset"))
                 // if(!strcmp(command, "recv"))
-                // if(!strcmp(command, "rstatus"))
                 // if(!strcmp(command, "rmdir"))
                 // if(!strcmp(command, "send"))
                 // if(!strcmp(command, "sendport"))
