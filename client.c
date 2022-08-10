@@ -4,18 +4,20 @@
 int main(int argc, char *argv[]) {
     int authChecker = 0, dataChecker = 0;
     int sock, fileSock;
-    char *sndArg;
+    char* raw_command;
     char command[15];
+    //char sndArg[RCVBUFSIZE];
+    char* sndArg;
     char path[RCVBUFSIZE];
     char echoBuffer[RCVBUFSIZE];
-    char commands[COMMAND_COUNTER][12] = {"!", "?", "ascii", "binary", "bye", "cd", "cdup", "close", "delete", "dir", "exit", "get", "hash", "help", "lcd", "ls", "mdelete", "mdir", "mget", "mkdir", "mls", "mput", "open", "passive", "put", "pwd", "rename", "restart", "reset", "recv", "rstatus", "rmdir", "send", "size", "status", "sendport", "quit", "disconnect"};
+    char commands[COMMAND_COUNTER][12] = {"", "?", "ascii", "binary", "bye", "cd", "cdup", "close", "delete", "dir", "exit", "get", "hash", "help", "lcd", "ls", "mdelete", "mdir", "mget", "mkdir", "mls", "mput", "open", "passive", "put", "pwd", "rename", "restart", "reset", "recv", "rstatus", "rmdir", "send", "size", "status", "sendport", "quit", "disconnect"};
     
-    if(argc == 2) 
-        ValidateConnection(&sock, &fileSock, argv[1], echoBuffer, &authChecker, &dataChecker);
     if (argc != 2) {
         fprintf(stderr, "Usage:  %s [Server IP]\n", argv[0]);
         exit(1);
     }
+    
+    ValidateConnection(&sock, &fileSock, argv[1], echoBuffer, &authChecker, &dataChecker);
 
     printf("\n");
     
@@ -24,10 +26,14 @@ int main(int argc, char *argv[]) {
 
     while(1) {
         printf("ftp> ");
-        fgets_wrapper(command, RCVBUFSIZE - 1, stdin);
+        
+        do {
+            fgets_wrapper(command, RCVBUFSIZE - 1, stdin);
+        } while(strlen(command) < 2);
 
-        parseCommandLine(command, &sndArg);
-            
+        raw_command = strtok(command, " ");
+        sndArg = strtok(NULL, " ");
+
         if(checkTheCommand(commands, command)) {
             if(!strcmp(command, "?") || !strcmp(command, "help"))
                 helpListCommand(commands);
@@ -47,7 +53,7 @@ int main(int argc, char *argv[]) {
             }
         
             if(authChecker) {
-                if(!strcmp(command, "cd"))
+                if(!strcmp(command, "cd")) 
                     cdCommand(&sock, echoBuffer, sndArg);
                 if(!strcmp(command, "disconnect") || !strcmp(command, "close")) {
                     disconnectFunc(&sock, &fileSock, echoBuffer);

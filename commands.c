@@ -4,6 +4,8 @@
 int checkTheCommand(char (*commands)[12], char *command) {
     int command_checker = 0;
 
+    // printf("command_4: %s\n", command);
+
     for(int i = 0; i < COMMAND_COUNTER; i++) {
         if(!strcmp(commands[i], command)) {
             command_checker = 1;
@@ -137,15 +139,6 @@ void cdCommand(int *sock, char *echoBuffer, char *path) {
     usleep(500*1000);
     sendFunc(sock, path);
     receiveFunc(sock, echoBuffer);
-}
-
-inline void parseCommandLine(char *command, char **sndArg) {
-    command = strtok(command, " ");
-    *sndArg = strtok(NULL, " ");
-
-    if(*sndArg == NULL) {
-        *sndArg = ".";
-    }
 }
 
 void CommandFunc(char *command, int *sock, int *fileSock, char *echoBuffer) {

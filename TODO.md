@@ -6,17 +6,16 @@ Project Description
 
 ### Todo
 
-- [ ] активный и пассивный режимы связи клиента и сервера  
-- [ ] конфигурационный файл  
-- [ ] Отправка бинарного файла  
 
 ### In Progress
 
-- [ ] get command (binary)  
 - [ ] реализация команд пользователя  
 
 ### Done ✓
 
+- [x] дебаг: Вывод "Invalid command" при входе  
+- [x] Отправка бинарного файла  
+- [x] get command (binary)  
 - [x] get command (text)  
 - [x] переписать обработчик сигнала  
 - [x] cd command  
