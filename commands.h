@@ -3,7 +3,7 @@
 #define COMMAND_COUNTER 38
 
 int checkTheCommand(char (*commands)[12], char *command);
-int authLogin(int *sock, char* echoBuffer);
+int authLoginPasswrd(int *sock, char* echoBuffer);
 int authPasswrd(int *sock, char* echoBuffer);
 int checkConnection(int *sock, char *ip, char *echoBuffer);
 void ValidateConnection(int *sock, int *fileSock, char *ip, char *echoBuffer, int *authChecker, int *dataChecker);

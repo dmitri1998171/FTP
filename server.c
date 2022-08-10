@@ -2,36 +2,33 @@
 
 #define MAXPENDING 5 
 
-struct auth_struct {
-    char login[RCVBUFSIZE];
-    char passwrd[RCVBUFSIZE];
-};
-
-int authPasswrd(int *sock, char* echoBuffer, char *passwrd) {
+int authLoginPasswrd(int *sock) {
+    char* echoBuffer;
     receiveFunc(sock, echoBuffer);
 
-    if(!strcmp(echoBuffer, passwrd)) {
-        sendFunc(sock, "230");
-        return 1;
-    }
-    else {
-        sendFunc(sock, "530");
-        close(*sock);
-        return 0;
-    }
-}
+    char str[RCVBUFSIZE];
+    char* login;
+    char* passwrd;
+    FILE* fd = fopen("auth.txt", "r");
 
-int authLogin(int *sock, char* echoBuffer, struct auth_struct *logPassList) {
-    receiveFunc(sock, echoBuffer);
+    while (fgets(str, RCVBUFSIZE, fd) != NULL) {
+        login = strtok(str, " ");
+        passwrd = strtok(NULL, " ");
 
-    for(int i = 0; i < 3; i++) {
-        if(!strcmp(echoBuffer, logPassList[i].login)) {
+        if(!strcmp(echoBuffer, login)) {
             sendFunc(sock, "331");
-            return authPasswrd(sock, echoBuffer, logPassList[i].passwrd);
-        }
+            receiveFunc(sock, echoBuffer);
+
+            if(!strcmp(echoBuffer, passwrd)) {
+                sendFunc(sock, "230");
+                return 1;
+            }
+        }        
     }
 
     sendFunc(sock, "530");
+    close(*sock);
+    fclose(fd);
     return 0;
 }
 
@@ -87,7 +84,6 @@ int checkTheFile(char *filename) {
 int main(int argc, char *argv[]) {
     char *path = "./";
     char *filename;
-    int authChecker = 0;
     int result = 0;
     int servSock, clntSock, servSockData, clntSockData;
     char dataBuffer[RCVBUFSIZE];
@@ -96,10 +92,6 @@ int main(int argc, char *argv[]) {
     unsigned short echoServPort;
     unsigned int clntLen, clntLenData;
     unsigned long fileSize;
-
-    struct auth_struct logPassList[3] = {"admin",     "admin", 
-                                         "anonymous", "",
-                                         "dmitry",    "123"};
 
     if (argc != 2) {
         fprintf(stderr, "Usage:  %s <Server Port>\n", argv[0]);
@@ -127,9 +119,8 @@ int main(int argc, char *argv[]) {
         
         printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
         sendFunc(&clntSock, "220");
-        authChecker = authLogin(&clntSock, echoBuffer, logPassList);
-
-        if(authChecker) {
+        
+        if(authLoginPasswrd(&clntSock)) {
             clntLenData = sizeof(echoClntAddrData);
             if((clntSockData = accept(servSockData, (struct sockaddr *) &echoClntAddrData, &clntLenData)) < 0) {
                 sendFunc(&clntSock, "426");

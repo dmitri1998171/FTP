@@ -3,9 +3,7 @@
 
 int checkTheCommand(char (*commands)[12], char *command) {
     int command_checker = 0;
-
-    // printf("command_4: %s\n", command);
-
+    
     for(int i = 0; i < COMMAND_COUNTER; i++) {
         if(!strcmp(commands[i], command)) {
             command_checker = 1;

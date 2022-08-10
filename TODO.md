@@ -13,6 +13,7 @@ Project Description
 
 ### Done ✓
 
+- [x] БД логин-пароль  
 - [x] дебаг: Вывод "Invalid command" при входе  
 - [x] Отправка бинарного файла  
 - [x] get command (binary)  
