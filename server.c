@@ -139,6 +139,20 @@ int main(int argc, char *argv[]) {
                     sendFunc(&clntSockData, dataBuffer);
                 }
 
+                if(!strcmp(echoBuffer, "MKD")) {
+                    receiveFunc(&clntSock, echoBuffer);
+
+                    result = mkdir(echoBuffer, S_IRWXU|S_IRGRP|S_IXGRP);
+                    sendResult(&clntSock, result);
+                }
+
+                if(!strcmp(echoBuffer, "RMD")) {
+                    receiveFunc(&clntSock, echoBuffer);
+
+                    result = rmdir(echoBuffer);
+                    sendResult(&clntSock, result);
+                }
+
                 if(!strcmp(echoBuffer, "PWD")) {
                     result = CommandFunc("pwd", dataBuffer);
                     sendResult(&clntSock, result);

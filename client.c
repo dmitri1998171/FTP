@@ -63,12 +63,14 @@ int main(int argc, char *argv[]) {
                     getFunc(&sock, &fileSock, echoBuffer, sndArg);
                 if(!strcmp(command, "ls"))
                     CommandFunc("LIST", &sock, &fileSock, echoBuffer);
-                // if(!strcmp(command, "mkdir"))
+                if(!strcmp(command, "mkdir"))
+                    mkdirCommand(&sock, echoBuffer, sndArg);
                 if(!strcmp(command, "pwd"))
                     CommandFunc("PWD", &sock, &fileSock, echoBuffer);
                 // if(!strcmp(command, "rename"))
                 // if(!strcmp(command, "recv"))
-                // if(!strcmp(command, "rmdir"))
+                if(!strcmp(command, "rmdir"))
+                    rmdirCommand(&sock, echoBuffer, sndArg);
                 // if(!strcmp(command, "send"))
                 // if(!strcmp(command, "sendport"))
                 // if(!strcmp(command, "size"))

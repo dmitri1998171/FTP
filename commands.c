@@ -3,7 +3,7 @@
 
 int checkTheCommand(char (*commands)[12], char *command) {
     int command_checker = 0;
-    
+
     for(int i = 0; i < COMMAND_COUNTER; i++) {
         if(!strcmp(commands[i], command)) {
             command_checker = 1;
@@ -134,6 +134,20 @@ void getFile(int *fileSock, char *filename) {
 
 void cdCommand(int *sock, char *echoBuffer, char *path) {
     sendFunc(sock, "CD");
+    usleep(500*1000);
+    sendFunc(sock, path);
+    receiveFunc(sock, echoBuffer);
+}
+
+void mkdirCommand(int *sock, char *echoBuffer, char *path) {
+    sendFunc(sock, "MKD");
+    usleep(500*1000);
+    sendFunc(sock, path);
+    receiveFunc(sock, echoBuffer);
+}
+
+void rmdirCommand(int *sock, char *echoBuffer, char *path) {
+    sendFunc(sock, "RMD");
     usleep(500*1000);
     sendFunc(sock, path);
     receiveFunc(sock, echoBuffer);

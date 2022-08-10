@@ -12,5 +12,7 @@ void disconnectFunc(int *sock, int *fileSock, char *echoBuffer);
 void helpListCommand(char (*commands)[12]);
 void getFile(int *fileSock, char *filename);
 void cdCommand(int *sock, char *echoBuffer, char *path);
+void mkdirCommand(int *sock, char *echoBuffer, char *path);
+void rmdirCommand(int *sock, char *echoBuffer, char *path);
 void CommandFunc(char *command, int *sock, int *fileSock, char *echoBuffer);
 int getFunc(int *sock, int *fileSock, char *echoBuffer, char* filename);
