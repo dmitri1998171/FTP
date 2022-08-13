@@ -139,6 +139,23 @@ int main(int argc, char *argv[]) {
                     sendFunc(&clntSockData, dataBuffer);
                 }
 
+                if(!strcmp(echoBuffer, "RNFR")) {                    
+                    char oldName[RCVBUFSIZE];
+
+                    receiveFunc(&clntSock, echoBuffer);     // Получаем старое имя файла
+                    strcpy(oldName, echoBuffer);
+
+                    result = checkTheFile(oldName);      // Проверка что файл существует
+                    sendResult(&clntSock, result);
+
+                    if(!result) {
+                        receiveFunc(&clntSock, echoBuffer);     // Получаем новое имя файла
+                        
+                        result = rename(oldName, echoBuffer);
+                        sendResult(&clntSock, result);       // Проверка результата
+                    }
+                }
+
                 if(!strcmp(echoBuffer, "MKD")) {
                     receiveFunc(&clntSock, echoBuffer);
 

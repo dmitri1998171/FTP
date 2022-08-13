@@ -153,6 +153,27 @@ void rmdirCommand(int *sock, char *echoBuffer, char *path) {
     receiveFunc(sock, echoBuffer);
 }
 
+void renameCommand(int *sock, char *echoBuffer) {
+    char name[RCVBUFSIZE];
+    
+    printf("from: ");
+    fgets_wrapper(name, RCVBUFSIZE, stdin);
+    
+    sendFunc(sock, "RNFR");
+    usleep(500*1000);
+
+    sendFunc(sock, name);           // Отправляем старое имя файла
+    receiveFunc(sock, echoBuffer);  // Проверка что файл существует
+
+    if(!strcmp(echoBuffer, "226")) {
+        printf("to: ");
+        fgets_wrapper(name, RCVBUFSIZE, stdin);
+
+        sendFunc(sock, name);       // Отправляем новое имя файла
+        receiveFunc(sock, echoBuffer);  // Проверка результата
+    }
+}
+
 void CommandFunc(char *command, int *sock, int *fileSock, char *echoBuffer) {
     char localBuffer[RCVBUFSIZE];
     // strcpy(echoBuffer, command);

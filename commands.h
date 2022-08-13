@@ -14,5 +14,6 @@ void getFile(int *fileSock, char *filename);
 void cdCommand(int *sock, char *echoBuffer, char *path);
 void mkdirCommand(int *sock, char *echoBuffer, char *path);
 void rmdirCommand(int *sock, char *echoBuffer, char *path);
+void renameCommand(int *sock, char *echoBuffer);
 void CommandFunc(char *command, int *sock, int *fileSock, char *echoBuffer);
 int getFunc(int *sock, int *fileSock, char *echoBuffer, char* filename);

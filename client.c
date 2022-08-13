@@ -67,7 +67,8 @@ int main(int argc, char *argv[]) {
                     mkdirCommand(&sock, echoBuffer, sndArg);
                 if(!strcmp(command, "pwd"))
                     CommandFunc("PWD", &sock, &fileSock, echoBuffer);
-                // if(!strcmp(command, "rename"))
+                if(!strcmp(command, "rename"))
+                    renameCommand(&sock, echoBuffer);
                 // if(!strcmp(command, "recv"))
                 if(!strcmp(command, "rmdir"))
                     rmdirCommand(&sock, echoBuffer, sndArg);
